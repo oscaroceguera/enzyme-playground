@@ -1,26 +1,49 @@
-import React, { Component } from 'react'
+/** @format */
+
+import React from 'react';
+import hookActions from './actions/hookActions';
 import './App.css';
 
-import GuessedWords from './GuessedWords'
-import Congrats from './Congrats'
+import Input from './input';
 
-class App extends Component {
-  render() {
+function reducer(state, action) {
+  switch (action.type) {
+    case 'secretWord':
+      return {
+        ...state,
+        secretWord: action.payload,
+      };
+    default:
+      throw new Error(`Invalid action type: ${action.type}`);
+  }
+}
+
+function App() {
+  const [state, dispatch] = React.useReducer(reducer, { secretWord: null });
+
+  const setSecretWord = (secretWord) =>
+    dispatch({ type: 'setSecretWord', payload: secretWord });
+
+  React.useEffect(() => {
+    hookActions.getSecretWord(setSecretWord);
+  }, []);
+
+  if (!state.secretWord) {
     return (
-      <div className="container">
-
-        <h1>JOto</h1>
-        <Congrats success={true} />
-        <GuessedWords
-          guessedWords={[
-            { guessedWord: 'train', letterMatchCount: 3 },
-            { guessedWord: 'agile', letterMatchCount: 1 },
-            { guessedWord: 'party', letterMatchCount: 5 },
-          ]}
-        />
+      <div className="container" data-test="spinner">
+        <div className="spinner-border" role="status">
+          <span className="sr-only">Loading...</span>
+          <p>Loading secret word</p>
+        </div>
       </div>
     );
   }
+
+  return (
+    <div className="container" data-test="component-app">
+      <Input secretWord={state.secretWord} />
+    </div>
+  );
 }
 
 export default App;
