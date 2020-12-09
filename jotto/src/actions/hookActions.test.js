@@ -1,10 +1,8 @@
-/** @format */
-
 import moxios from 'moxios';
 
 import { getSecretWord } from './hookActions';
 
-describe('moxios test', () => {
+describe('moxios tests', () => {
   beforeEach(() => {
     moxios.install();
   });
@@ -12,23 +10,85 @@ describe('moxios test', () => {
     moxios.uninstall();
   });
 
-  test('Calls the geetsecretWord callback on axios response', async () => {
+  describe('non-error response', () => {
+    // create mocks for callback args
+    const mockSetSecretWord = jest.fn();
+    const mockSetServerError = jest.fn();
     const secretWord = 'party';
-
-    moxios.wait(() => {
-      const request = moxios.requests.mostRecent();
-      request.respondWith({
-        status: 200,
-        response: secretWord,
+      
+    beforeEach(async () => {
+      moxios.wait(() => {
+        const request = moxios.requests.mostRecent();
+        request.respondWith({
+          status: 200,
+          response: secretWord,
+        });
       });
+      
+      await getSecretWord(mockSetSecretWord, mockSetServerError);
+      
     });
-
-    // create mock foor callback arg
-    const mockSecretWord = jest.fn();
-
-    await getSecretWord(mockSecretWord);
-
-    // see whether mock was run with th ecorrect argument
-    expect(mockSecretWord).toHaveBeenCalledWith(secretWord);
+    test('calls the getSecretWord callback on axios response', async () => {
+     // see whether mock was run with the correct argument
+      expect(mockSetSecretWord).toHaveBeenCalledWith(secretWord);
+    });
+    test('does not call the setServerError callback on axios response', async () => {
+     // see whether mock was run with the correct argument
+      expect(mockSetServerError).not.toHaveBeenCalled();
+    });
   });
+
+  // Challenge #5: Server Error
+  describe('5xx error response', () => {
+    // create mocks for callback args
+    const mockSetSecretWord = jest.fn();
+    const mockSetServerError = jest.fn();
+      
+    beforeEach(async () => {
+      moxios.wait(() => {
+        const request = moxios.requests.mostRecent();
+        request.respondWith({
+          status: 500,
+        });
+      });
+      
+      await getSecretWord(mockSetSecretWord, mockSetServerError);
+      
+    });
+    test('calls the getSecretWord callback on axios response', async () => {
+     // see whether mock was run with the correct argument
+      expect(mockSetServerError).toHaveBeenCalledWith(true);
+    });
+    test('does not call the setServerError callback on axios response', async () => {
+     // see whether mock was run with the correct argument
+      expect(mockSetSecretWord).not.toHaveBeenCalled();
+    });
+  });
+  describe('4xx error response', () => {
+    // create mocks for callback args
+    const mockSetSecretWord = jest.fn();
+    const mockSetServerError = jest.fn();
+      
+    beforeEach(async () => {
+      moxios.wait(() => {
+        const request = moxios.requests.mostRecent();
+        request.respondWith({
+          status: 404,
+        });
+      });
+      
+      await getSecretWord(mockSetSecretWord, mockSetServerError);
+      
+    });
+    test('calls the getSecretWord callback on axios response', async () => {
+     // see whether mock was run with the correct argument
+      expect(mockSetServerError).toHaveBeenCalledWith(true);
+    });
+    test('does not call the setServerError callback on axios response', async () => {
+     // see whether mock was run with the correct argument
+      expect(mockSetSecretWord).not.toHaveBeenCalled();
+    });
+  });
+  // Challenge #5: Server Error
 });
+

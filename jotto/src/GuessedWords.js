@@ -1,55 +1,59 @@
-import React from 'react'
-import PropTypes from 'prop-types'
+import React from 'react';
 
-const GuessedWords = props => {
-  let contents;
-  if (props.guessedWords.length === 0) {
+import guessedWordsContext from './contexts/guessedWordsContext';
+import languageContext from './contexts/languageContext';
+import stringsModule from './helpers/strings';
+
+const GuessedWords = () => {
+  const [guessedWords] = guessedWordsContext.useGuessedWords();
+  const language = React.useContext(languageContext);
+  let contents
+  if (guessedWords.length === 0) {
     contents = (
-      <span data-test='guess-instructions'>
-        Try to guess the secret word!
+      <span data-test="guess-instructions">
+        {stringsModule.getStringByLanguage(language, 'guessPrompt')}
       </span>
-    ) 
+    );
   } else {
-
-    const guessedWordsRow = props.guessedWords.map((word, index) => (
-      <tr data-test='guessed-word' key={index}>
-        <td>{word.guessedWord}</td>
-        <td>{word.letterMatchCount}</td>
+    const guessedWordsRows = guessedWords.map((word, index) => (
+      <tr data-test="guessed-word" key={ index }>
+        <td data-test="guessed-word-index">{ index + 1 }</td>
+        <td>{ word.guessedWord }</td>
+        <td>{ word.letterMatchCount }</td>
       </tr>
-    ))
+    ));
     contents = (
-      <div data-test='guessed-words'>
-        <h3>Guessed words</h3>
-        <table className='table table-sm'>
-          <thead className='thead-light'>
+      <div data-test="guessed-words">
+        <h3>{stringsModule.getStringByLanguage(language, 'guessedWords')}</h3>
+        <table className="table table-sm">
+          <thead className="thead-light">
             <tr>
-              <th>Guess</th>
-              <th>Matching letters</th>
+              {// Challenge #1: Number of Guesses
+              }
+              <th>{stringsModule.getStringByLanguage(language, 'numberColumnHeader')}</th>
+              {// END: Challenge #1: Number of Guesses
+              }
+              <th>{stringsModule.getStringByLanguage(language, 'guessColumnHeader')}</th>
+              <th>{stringsModule.getStringByLanguage(language, 'matchingLettersColumnHeader')}</th>
             </tr>
           </thead>
           <tbody>
-            {guessedWordsRow}
+            { guessedWordsRows }
           </tbody>
         </table>
+        {// Challenge #1: Number of Guesses
+        }
+        <div data-test='total-guesses'>{stringsModule.getStringByLanguage(language, 'totalGuesses')}: {guessedWords.length}</div>
+        {// END: Challenge #1: Number of Guesses
+        }
       </div>
-    )
+    );
   }
-  
   return (
-    <div data-test='component-guessed-words'>
-      {contents}
+    <div data-test="component-guessed-words">
+      { contents }
     </div>
-  )
-  
-}
+  );
+};
 
-GuessedWords.propTypes = {
-  guessedWords: PropTypes.arrayOf(
-    PropTypes.shape({
-      guessedWord: PropTypes.string.isRequired,
-      letterMatchCount: PropTypes.number.isRequired
-    })
-  ).isRequired
-}
-
-export default GuessedWords
+export default GuessedWords;
